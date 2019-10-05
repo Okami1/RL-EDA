@@ -8,18 +8,13 @@ from FitnessFunctions import OneMax, LeadingOnes, BinVal
 
 import numpy as np
 import random
-import matplotlib.pyplot as plt
- 
-def plot_fitness(fit, best):
-    index = np.array(range(len(fit)))
-    plt.plot(index, fit, label="Best sample")
-    plt.plot(index, [best for i in range(len(fit))], label="Best possible fitness")
-    plt.legend()
-    plt.xlabel("Iteration")
-    plt.ylabel("Fitness value")
-        
+import matplotlib.pyplot as plt    
 
-def UMDA(fit, n=10, lamb=50, mu=10, maxiter=100, verbose=False):      
+def UMDA(fit, n=10, lamb=50, mu=10, maxiter=100):
+    '''
+        Maximize bit-string function by the UMDA EDA.
+        Returns the best fitness over time along with the final probability vector.
+    '''
     p = np.array([0.5] * n)
     m = 1/n
     fitness = []
@@ -39,13 +34,14 @@ def UMDA(fit, n=10, lamb=50, mu=10, maxiter=100, verbose=False):
         
         if fitness[-1] == fit.best(n):
             break
-            
-    if verbose:
-        plot_fitness(fitness, fit.best(n))
-            
+
     return (fitness, p)
         
-def PBIL(fit, n=10, lamb=50, mu=10, maxiter=100, verbose=False, rho=0.9):
+def PBIL(fit, n=10, lamb=50, mu=10, maxiter=100, rho=0.9):
+    '''
+        Maximize bit-string function by the PBIL EDA.
+        Returns the best fitness over time along with the final probability vector.
+    '''
     p = np.array([0.5] * n)
     print(p)
     m = 1/n
@@ -68,12 +64,13 @@ def PBIL(fit, n=10, lamb=50, mu=10, maxiter=100, verbose=False, rho=0.9):
         if fitness[-1] == fit.best(n):
             break
         
-    if verbose:
-        plot_fitness(fitness, fit.best(n))
-        
     return (fitness, p)
         
-def MMAS(fit, n=10, lamb=50, mu=10, maxiter=100, verbose=False, rho=0.5):        
+def MMAS(fit, n=10, lamb=50, mu=10, maxiter=100, rho=0.5):
+    '''
+        Maximize bit-string function by the MMAS EDA.
+        Returns the best fitness over time along with the final probability vector.
+    '''
     p = np.array([0.5] * n)
     m = 1/n
     fitness = []
@@ -93,12 +90,13 @@ def MMAS(fit, n=10, lamb=50, mu=10, maxiter=100, verbose=False, rho=0.5):
         if fitness[-1] == fit.best(n):
             break
         
-    if verbose:
-        plot_fitness(fitness, fit.best(n))
-        
     return (fitness, p)
     
-def cGA(fit, n=10, lamb=50, mu=10, maxiter=100, verbose=False, K=10):       
+def cGA(fit, n=10, lamb=50, mu=10, maxiter=100, K=10):
+    '''
+        Maximize bit-string function by the CGA EDA.
+        Returns the best fitness over time along with the final probability vector.
+    '''
     p = np.array([0.5] * n)
     m = 1/n
     fitness = []
@@ -118,9 +116,6 @@ def cGA(fit, n=10, lamb=50, mu=10, maxiter=100, verbose=False, K=10):
         
         if fitness[-1] == fit.best(n):
             break
-        
-    if verbose:
-        plot_fitness(fitness, fit.best(n))
     
     return (fitness, p)
     

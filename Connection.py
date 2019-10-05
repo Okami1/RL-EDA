@@ -49,10 +49,21 @@ class Adam(object):
         self.v = self.beta2 * self.v + (1 - self.beta2) * raw_grad**2
         
         return alphat * self.m / (np.sqrt(self.v) + self.epsilon)
+    
+class SGA(object):
+    '''
+        Implements stochastic gradient ascent
+    '''
+    
+    def __init__(self, alpha=0.01):
+        self.alpha = alpha
+    
+    def step(self, raw_grad):
+        return alpha * raw_grad
+    
 
-
-def stoch_grad_asc(func, N=100, maxiter=1000, alpha=0.01, m=10, r_past_ema=0.0,
-                   r_z_score=False, do_adam=False):
+def stoch_grad_asc(func, optim, N=100, maxiter=1000, alpha=0.01, m=10, r_past_ema=0.0,
+                   r_z_score=False):
     '''
         Maximize bit-string function by stochastic gradient ascent. The returned
         accuracy assumes that the optimium is the (1, 1, ..., 1) value
@@ -69,12 +80,9 @@ def stoch_grad_asc(func, N=100, maxiter=1000, alpha=0.01, m=10, r_past_ema=0.0,
             r_z_score:   If true, z-score rewards over batch. This both stabilizes
                          the variance and ensures that the learning rate does not 
                          get too high
-            do_adam:     If true, use ADAM (Kingma & Welling, 2014) instead of vanilla
-                         stochastic gradient ascent
     '''
     
-    if do_adam:
-        theta_adam = Adam(alpha=alpha)
+    theta_optim = optim(alpha)
     
     # Initialize policy
     theta = np.zeros((N, maxiter))
@@ -82,7 +90,7 @@ def stoch_grad_asc(func, N=100, maxiter=1000, alpha=0.01, m=10, r_past_ema=0.0,
     # Expected accuracy is .5
     acc = np.zeros(maxiter) + .5
     
-    # Fitness of best samples
+    # Best so far fitness
     best = np.zeros(maxiter)
 
     for iter in range(1, maxiter):
@@ -95,7 +103,10 @@ def stoch_grad_asc(func, N=100, maxiter=1000, alpha=0.01, m=10, r_past_ema=0.0,
         a = 1 * (np.random.rand(m, N) < np.tile(p[None, :], (m, 1)))
         # collect rewards
         r = func.eval2d(a)
-        best[iter-1] = np.amax(r)
+
+        # update best fitness if applicable
+        iteration_best = np.amax(r)
+        best[iter-1] = max(iteration_best, best[iter-2])
         
         if iter == 1:
             deltar = r
@@ -108,10 +119,7 @@ def stoch_grad_asc(func, N=100, maxiter=1000, alpha=0.01, m=10, r_past_ema=0.0,
         # gradient step
         theta_grad = np.mean((a - p[None, :]) * deltar[:, None], axis=0)
         
-        if do_adam:
-            theta[:, iter] = theta[:, iter-1] + theta_adam.step(theta_grad)
-        else:
-            theta[:, iter] = theta[:, iter-1] + alpha * theta_grad
+        theta[:, iter] = theta[:, iter-1] + theta_optim.step(theta_grad)
         
         r_past = r.mean()
     
@@ -121,60 +129,56 @@ def stoch_grad_asc(func, N=100, maxiter=1000, alpha=0.01, m=10, r_past_ema=0.0,
     
     return acc, best, theta
     
-N=1000
+N=100
 m=10
-maxiter=10000
+maxiter=1000
 alpha = 0.1
 r_past_emd = 0.0
+
+fitness = OneMax()
 
 acc = []
 best = []
 
-a, b, _ = stoch_grad_asc(OneMax, N=N, m=m, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)
+#Show theta evolution
+#acc, _, theta = stoch_grad_asc(OneMax, SGA, N=N, m=m, maxiter=maxiter, alpha=0.1, r_past_ema=0.0, r_z_score=True)
 
-acc.append(a)
-best.append(b)
+best.append(stoch_grad_asc(fitness, SGA, N=N, m=1, maxiter=maxiter, alpha=0.1, r_past_ema=0.0, r_z_score=False)[1])
+best.append(stoch_grad_asc(fitness, SGA, N=N, m=10, maxiter=maxiter, alpha=0.1, r_past_ema=0.0, r_z_score=False)[1])
+best.append(stoch_grad_asc(fitness, SGA, N=N, m=50, maxiter=maxiter, alpha=0.1, r_past_ema=0.0, r_z_score=False)[1])
+best.append(stoch_grad_asc(fitness, SGA, N=N, m=150, maxiter=maxiter, alpha=0.1, r_past_ema=0.0, r_z_score=False)[1])
+best.append(stoch_grad_asc(fitness, SGA, N=N, m=200, maxiter=maxiter, alpha=0.1, r_past_ema=0.0, r_z_score=False)[1])
 
-acc = acc * 1000
-
-
-'''
-acc.append(stoch_grad_asc(OneMax, N=100, m=m, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-acc.append(stoch_grad_asc(OneMax, N=500, m=m, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-acc.append(stoch_grad_asc(OneMax, N=1000, m=m, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-acc.append(stoch_grad_asc(OneMax, N=2000, m=m, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-acc.append(stoch_grad_asc(OneMax, N=5000, m=m, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-acc.append(stoch_grad_asc(OneMax, N=10000, m=m, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-acc.append(stoch_grad_asc(OneMax, N=20000, m=m, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-acc.append(stoch_grad_asc(OneMax, N=50000, m=m, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-acc.append(stoch_grad_asc(OneMax, N=100000, m=m, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-'''
-
-legend = ['Accuracy', 'Best fitness']
+legend = ['SGA, N = 100, m = 1',
+          'SGA, N = 100, m = 10',
+          'SGA, N = 100, m = 50',
+          'SGA, N = 100, m = 100',
+          'SGA, N = 100, m = 150',
+          'SGA, N = 100, m = 200']
 
 plt.figure()
 plt.clf()
 #plt.subplot(1,2,1)
-plt.plot(np.ones(maxiter) * 1000, 'k:')
 
 handles = []
-for acc_this in acc:
-    handles.append(plt.plot(acc_this)[0])
-    
+
+#plt.plot(np.ones((maxiter,)), 'k:')
+#for acc_this in acc:
+#    handles.append(plt.plot(acc_this)[0])
+
 for best_this in best:
     handles.append(plt.plot(best_this)[0])
 
-plt.title('SGA, N = 10, m = 10')
+
 plt.xlabel('Iterations')
-plt.ylabel('Fitness')
+plt.ylabel('Mean accuracy')
 
 plt.legend(handles, legend)
+'''
+plt.subplot(1,2,2)
+plt.imshow(theta)
 
-#plt.subplot(1,2,2)
-#plt.imshow(theta)
-#
-#plt.xlabel('Iterations')
-#plt.ylabel('theta_i')
-#plt.tight_layout()
-
-    
+plt.xlabel('Iterations')
+plt.ylabel('theta_i')
+plt.tight_layout()
+'''
