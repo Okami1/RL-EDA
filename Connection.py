@@ -121,52 +121,43 @@ def stoch_grad_asc(func, N=100, maxiter=1000, alpha=0.01, m=10, r_past_ema=0.0,
     
     return acc, best, theta
     
-N=1000
+N=20000
 m=10
-maxiter=10000
+maxiter=40000
 alpha = 0.1
-r_past_emd = 0.0
+r_past_ema = 0.0
 
 acc = []
 best = []
 
-a, b, _ = stoch_grad_asc(OneMax, N=N, m=m, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)
+acc.append(stoch_grad_asc(OneMax, N=N, m=1, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
+acc.append(stoch_grad_asc(OneMax, N=N, m=2, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
+acc.append(stoch_grad_asc(OneMax, N=N, m=3, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
+acc.append(stoch_grad_asc(OneMax, N=N, m=5, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
+acc.append(stoch_grad_asc(OneMax, N=N, m=7, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
+acc.append(stoch_grad_asc(OneMax, N=N, m=9, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
+acc.append(stoch_grad_asc(OneMax, N=N, m=10, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
 
-acc.append(a)
-best.append(b)
-
-acc = acc * 1000
-
-
-'''
-acc.append(stoch_grad_asc(OneMax, N=100, m=m, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-acc.append(stoch_grad_asc(OneMax, N=500, m=m, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-acc.append(stoch_grad_asc(OneMax, N=1000, m=m, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-acc.append(stoch_grad_asc(OneMax, N=2000, m=m, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-acc.append(stoch_grad_asc(OneMax, N=5000, m=m, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-acc.append(stoch_grad_asc(OneMax, N=10000, m=m, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-acc.append(stoch_grad_asc(OneMax, N=20000, m=m, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-acc.append(stoch_grad_asc(OneMax, N=50000, m=m, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-acc.append(stoch_grad_asc(OneMax, N=100000, m=m, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-'''
-
-legend = ['Accuracy', 'Best fitness']
+legend = ['SGA, N = 50000, m = 1',
+          'SGA, N = 50000, m = 2',
+          'SGA, N = 50000, m = 3',
+          'SGA, N = 50000, m = 5',
+          'SGA, N = 50000, m = 7',
+          'SGA, N = 50000, m = 9',
+          'SGA, N = 50000, m = 10'
+          ]
 
 plt.figure()
 plt.clf()
 #plt.subplot(1,2,1)
-plt.plot(np.ones(maxiter) * 1000, 'k:')
+plt.plot(np.ones(maxiter), 'k:')
 
 handles = []
 for acc_this in acc:
     handles.append(plt.plot(acc_this)[0])
-    
-for best_this in best:
-    handles.append(plt.plot(best_this)[0])
 
-plt.title('SGA, N = 10, m = 10')
 plt.xlabel('Iterations')
-plt.ylabel('Fitness')
+plt.ylabel('Mean accuracy')
 
 plt.legend(handles, legend)
 
