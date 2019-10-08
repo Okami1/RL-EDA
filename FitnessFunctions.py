@@ -21,6 +21,22 @@ class OneMax:
     
     def best(self, n):
         return n
+    
+class ZeroMax:
+    '''
+        Implements the ZeroMax bit-string optimization, the 1 dimensional
+        eval returns a scalar while the 2-dimensional eval returns an
+        array of scalars.
+    '''
+    
+    def eval1d(self, sample):
+        return len(sample) - np.sum(sample)
+    
+    def eval2d(self, samples):
+        return len(samples[0]) - np.sum(samples, axis=1)
+    
+    def best(self, n):
+        return n    
 
 class LeadingOnes:
     '''
