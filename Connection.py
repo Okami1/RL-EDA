@@ -130,7 +130,7 @@ def stoch_grad_asc(func, optim, N=100, maxiter=1000, alpha=0.01, m=10, r_past_em
         
     return acc, best, theta
     
-N = [200, 200, 200, 200, 200]
+N = [10, 50, 100, 150, 200, 250, 300]
 #m = 1.5*N
 maxiter=10000
 alpha = 0.1
@@ -139,25 +139,31 @@ r_past_emd = 0.0
 fitness = OneMax()
 
 acc = []
-best = np.zeros((6, maxiter))
+best = np.zeros((len(N), maxiter))
 
 iterations = 1
 
-#Theta drift 
+#Theta drift
 #acc, _, theta = stoch_grad_asc(OneMax, SGA, N=N, m=m, maxiter=maxiter, alpha=0.1, r_past_ema=0.0, r_z_score=True)
 
 for _ in range(iterations):
-    best[0] += stoch_grad_asc(fitness, SGA, N=N[0], m=int(N[0]), maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=False)[1]
-    best[1] += stoch_grad_asc(fitness, SGA, N=N[1], m=int(N[1] + log(N[1])), maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=False)[1]
-    best[2] += stoch_grad_asc(fitness, SGA, N=N[2], m=int(N[2] + 2*log(N[2])), maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=False)[1]
+    best[0] += stoch_grad_asc(fitness, SGA, N=N[0], m=int(N[0] * log(N[0])), maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=False)[1]
+    best[1] += stoch_grad_asc(fitness, SGA, N=N[1], m=int(N[1] * log(N[1])), maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=False)[1]
+    best[2] += stoch_grad_asc(fitness, SGA, N=N[2], m=int(N[2] * log(N[2])), maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=False)[1]
     best[3] += stoch_grad_asc(fitness, SGA, N=N[3], m=int(N[3] * log(N[3])), maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=False)[1]
+    best[4] += stoch_grad_asc(fitness, SGA, N=N[4], m=int(N[4] * log(N[4])), maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=False)[1]
+    best[5] += stoch_grad_asc(fitness, SGA, N=N[5], m=int(N[5] * log(N[5])), maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=False)[1]
+    best[6] += stoch_grad_asc(fitness, SGA, N=N[6], m=int(N[6] * log(N[6])), maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=False)[1]
     
 best = best / iterations
 
-legend = ['SGA, N = 200, m = N',
-          'SGA, N = 200, m = N + logN',
-          'SGA, N = 200, m = N + 2logN',
-          'SGA, N = 200, m = N * logN']
+legend = ['SGA, N = 10, m = N * logN',
+          'SGA, N = 50, m = N * logN',
+          'SGA, N = 100, m = N * logN',
+          'SGA, N = 150, m = N * logN',
+          'SGA, N = 200, m = N * logN',
+          'SGA, N = 250, m = N * logN',
+          'SGA, N = 300, m = N * logN',]
 
 plt.figure(figsize=(8,8))
 plt.title("Convergence, 10-Averaged")
@@ -189,4 +195,4 @@ plt.ylabel('theta_i')
 plt.tight_layout()
 '''
 
-plt.savefig("Convergence/Fitness_basic/N200_m_random_tries.png")
+plt.savefig("Convergence/Fitness_basic/N_mLinearLog.png")
