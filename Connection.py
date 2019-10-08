@@ -132,9 +132,9 @@ def stoch_grad_asc(func, optim, N=100, maxiter=1000, alpha=0.01, m=10, r_past_em
     
 N = [10, 50, 100, 150, 200, 250, 300]
 #m = 1.5*N
-maxiter=10000
+maxiter=1000
 alpha = 0.1
-r_past_emd = 0.0
+r_past_ema = 0.0
 
 fitness = OneMax()
 
