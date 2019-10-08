@@ -13,8 +13,9 @@ Created on Wed Jul 17 15:07:21 2019
 @author: ingmar
 """
 
-from FitnessFunctions import OneMax, LeadingOnes, BinVal
+from FitnessFunctions import OneMax, ZeroMax, LeadingOnes, BinVal
 
+from math import log
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -126,59 +127,43 @@ def stoch_grad_asc(func, optim, N=100, maxiter=1000, alpha=0.01, m=10, r_past_em
     # final accuracy & best fitness
     acc[iter] = np.mean(p)
     best[iter] = max(iteration_best, best[iter-1])
-    
+        
     return acc, best, theta
     
-N=20000
-m=10
-maxiter=40000
-
+N = [100, 100, 100, 100]
+#m = 1.5*N
+maxiter=1000
 alpha = 0.1
 r_past_ema = 0.0
 
 fitness = OneMax()
 
 acc = []
-best = []
-best.append(stoch_grad_asc(fitness, SGA, N=N, m=1, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True)[1])
-best.append(stoch_grad_asc(fitness, SGA, N=N, m=2, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True)[1])
-best.append(stoch_grad_asc(fitness, SGA, N=N, m=3, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True)[1])
-best.append(stoch_grad_asc(fitness, SGA, N=N, m=5, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True)[1])
-best.append(stoch_grad_asc(fitness, SGA, N=N, m=7, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True)[1])
-best.append(stoch_grad_asc(fitness, SGA, N=N, m=9, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True)[1])
-best.append(stoch_grad_asc(fitness, SGA, N=N, m=10, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True)[1])
 
-legend = ['SGA, N = 50000, m = 1',
-          'SGA, N = 50000, m = 2',
-          'SGA, N = 50000, m = 3',
-          'SGA, N = 50000, m = 5',
-          'SGA, N = 50000, m = 7',
-          'SGA, N = 50000, m = 9',
-          'SGA, N = 50000, m = 10'
-          ]
+best = np.zeros((len(N), maxiter))
+theta = []
 
-plt.figure()
-plt.clf()
-#plt.subplot(1,2,1)
+iterations = 1
 
-handles = []
+#Theta drift 
+_, _, theta1 = stoch_grad_asc(fitness, SGA, N=N[0], m=int(log(N[0])), maxiter=maxiter, alpha=0.1, r_past_ema=0.0, r_z_score=True) 
+_, _, theta2 = stoch_grad_asc(fitness, SGA, N=N[0], m=int(0.5*N[0]), maxiter=maxiter, alpha=0.1, r_past_ema=0.0, r_z_score=True)
+_, _, theta3 = stoch_grad_asc(fitness, SGA, N=N[0], m=int(0.75*N[0]), maxiter=maxiter, alpha=0.1, r_past_ema=0.0, r_z_score=True)
+_, _, theta4 = stoch_grad_asc(fitness, SGA, N=N[0], m=int(N[0]), maxiter=maxiter, alpha=0.1, r_past_ema=0.0, r_z_score=True)
+theta.append(theta1)
+theta.append(theta2)
+theta.append(theta3)
+theta.append(theta4)
 
-#plt.plot(np.ones((maxiter,)), 'k:')
-#for acc_this in acc:
-#    handles.append(plt.plot(acc_this)[0])
+titles = [['N=100, m=logN', 'N=100, m=0.5N'], ['N=100, m=0.75N', 'N=100, m=N']]
 
-for best_this in best:
-    handles.append(plt.plot(best_this)[0])
+fig, axs = plt.subplots(nrows=2, ncols=2, figsize=(10,10))
 
-plt.xlabel('Iterations')
-plt.ylabel('Mean accuracy')
+for i in range(len(axs)):
+    for j in range(len(axs[i])):
+        axs[i][j].imshow(theta[i])
+        axs[i][j].set_title(titles[i][j])
+        axs[i][j].set_xlabel('Iterations')
+        axs[i][j].set_ylabel('theta_i')
 
-plt.legend(handles, legend)
-'''
-plt.subplot(1,2,2)
-plt.imshow(theta)
-
-plt.xlabel('Iterations')
-plt.ylabel('theta_i')
-plt.tight_layout()
-'''
+plt.savefig("Convergence/Fitness_basic/Theta_drifts_Bad")
