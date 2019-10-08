@@ -125,7 +125,7 @@ def stoch_grad_asc(func, optim, N=100, maxiter=1000, alpha=0.01, m=10, r_past_em
     
     # final accuracy & best fitness
     acc[iter] = np.mean(p)
-    best[iter] = np.amax(r)
+    best[iter] = max(iteration_best, best[iter-1])
     
     return acc, best, theta
     
@@ -140,13 +140,13 @@ fitness = OneMax()
 
 acc = []
 best = []
-acc.append(stoch_grad_asc(OneMax, N=N, m=1, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-acc.append(stoch_grad_asc(OneMax, N=N, m=2, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-acc.append(stoch_grad_asc(OneMax, N=N, m=3, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-acc.append(stoch_grad_asc(OneMax, N=N, m=5, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-acc.append(stoch_grad_asc(OneMax, N=N, m=7, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-acc.append(stoch_grad_asc(OneMax, N=N, m=9, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
-acc.append(stoch_grad_asc(OneMax, N=N, m=10, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True, do_adam=False)[0])
+best.append(stoch_grad_asc(fitness, SGA, N=N, m=1, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True)[1])
+best.append(stoch_grad_asc(fitness, SGA, N=N, m=2, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True)[1])
+best.append(stoch_grad_asc(fitness, SGA, N=N, m=3, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True)[1])
+best.append(stoch_grad_asc(fitness, SGA, N=N, m=5, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True)[1])
+best.append(stoch_grad_asc(fitness, SGA, N=N, m=7, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True)[1])
+best.append(stoch_grad_asc(fitness, SGA, N=N, m=9, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True)[1])
+best.append(stoch_grad_asc(fitness, SGA, N=N, m=10, maxiter=maxiter, alpha=alpha, r_past_ema=0.0, r_z_score=True)[1])
 
 legend = ['SGA, N = 50000, m = 1',
           'SGA, N = 50000, m = 2',
