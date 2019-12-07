@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 """
 Created on Tue Oct  1 09:41:51 2019
 
 @author: thoma
 """
+
 import numpy as np
 
 class OneMax:
@@ -68,7 +68,7 @@ class LeadingOnes:
 class BinVal:
     '''
         Implements the BinVal bit-string optimization, the 1 dimensional
-        eval returns a scalar while the 2-dimensional eval returns an
+        eval returns a scalar and the 2-dimensional eval returns an
         array of scalars.
     '''
 
@@ -81,9 +81,8 @@ class BinVal:
     def eval2d(self, samples):
         vals = np.zeros(len(samples))
         for i in range(len(samples)):
-            l = len(samples[i])
-            for idx, x in enumerate(samples[i]):
-                vals[i] += 2 ** (l - 1 - idx) * x
+            vals[i] = self.eval1d(samples[i])
+        return vals
     
     def best(self, n):
         val = 0
@@ -94,16 +93,16 @@ class BinVal:
 class Jump:
     '''
         Implements the jump bit-string optimization, the 1 dimensional
-        eval returns a scalar while the 2-dimensional eval returns an
+        eval returns a scalar and the 2-dimensional eval returns an
         array of scalars.
     '''
     
     def __init__(self, m):
         self.m = m
-        self.onemax = OneMax
+        self.onemax = OneMax()
 
     def eval1d(self, sample):
-        o_max = self.onemax(sample)
+        o_max = self.onemax.eval1d(sample)
         n = len(sample)
         if o_max < n - self.m or o_max == n:
             return self.m + o_max
@@ -113,12 +112,12 @@ class Jump:
     def eval2d(self, samples):
         vals = np.zeros(len(samples))
         for i in range(len(samples)):
-            o_max = self.onemax(samples[i])
-            n = len(samples[i])
-            if o_max < n - self.m or o_max == n:
-                vals[i] = self.m + o_max
-            else:
-                vals[i] = n - o_max
+            vals[i] = self.eval1d(samples[i])
+        return vals
     
     def best(self, n):
-        return n
+        return n + self.m
+    
+    
+    
+    

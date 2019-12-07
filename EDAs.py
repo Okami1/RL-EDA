@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 """
 Created on Tue Sep 10 18:41:19 2019
 
 @author: thoma
 """
+
 from FitnessFunctions import OneMax, LeadingOnes, BinVal
 
 import numpy as np
@@ -130,9 +130,10 @@ if __name__ == '__main__':
     mu = 10
     maxiter = 500
         
-    #f, p = UMDA(fitness, n, lamb, mu, maxiter)
+    fitness, probabilities = UMDA(fitness, n, lamb, mu, maxiter)
     #f, p = PBIL(fitness, n, lamb, mu, maxiter)
-    f, p = MMAS(fitness, n, lamb, mu, maxiter)
+    #f, p = MMAS(fitness, n, lamb, mu, maxiter)
     #f, p = cGA(fitness, n, lamb, mu, maxiter)
-    print(f)
-    print(p)
+    
+    print(f"Fitness:\n{fitness}")
+    print(f"Probabilities:\n{probabilities[:len(fitness)+1]}")
